@@ -153,7 +153,6 @@ async function addEmployee(){
         }
     ])
 
-    console.log(newEmployee);
     const { firstName, lastName, roleAssign, managerAsign } = newEmployee;
 
     await db.promise().query(`insert into employee ( first_name, last_name, role_id, manager_id ) values ( ?, ?, ?, ? );`,
@@ -170,7 +169,63 @@ async function addEmployee(){
 }
 
 async function updateEmployee(){
+    let rolesRaw;
     
+    await db.promise().query(`select * from roles;`)
+    .then( ([rows,fields])  => {
+        rolesRaw = rows;
+    })
+    .catch(console.error)
+
+    let employeeRaw;
+
+    await db.promise().query(`select * from employee;`)
+    .then( ([rows,fields])  => {
+        employeeRaw = rows;
+    })
+    .catch(console.error)
+
+    const updateEmployee = await inquirer.prompt([
+    {
+        type: 'list',
+        name: 'currentE',
+        message: 'What employee to update? ',
+        choices: employeeRaw.map(person => person.first_name + " " + person.last_name),
+        filter: (input) => {
+            const personID = employeeRaw.find( name => (name.first_name + " " + name.last_name) === input)
+            return personID.id
+        }
+        
+    },
+    {
+        type: 'list',
+        name: 'newRole',
+        message: 'New role? ',
+        choices: rolesRaw.map(role => role.title),
+        filter: (input) => {
+            const roleID = rolesRaw.find( role => role.title === input)
+            return roleID.id
+        }
+        
+    },
+
+    ])
+
+    const { currentE, newRole } = updateEmployee
+
+    await db.promise().query(`update employee set role_id = ? where id = ?;`,
+    [newRole, currentE])
+    .then(([rows,fields]) => {
+         console.log( chalk.bgBlueBright.white(`Updated Employee`));
+    } )
+    .catch((err) => {
+        console.log(err);
+    })
+
+
+
+    console.log(currentE, newRole);
+
 }
 
 
