@@ -13,11 +13,11 @@ const deptMenu = [
             new inquirer.Separator(), 
             {
                 name: "Show active departments",
-                value: "all"
+                value: "get"
              },
              {
                  name: "Add department",
-                 value: "add"
+                 value: "post"
              },
             //  {
             //      name: "Remove department",
@@ -42,7 +42,7 @@ async function manageDepartments(){
 
     switch (deparmentActions.action){
         
-        case "all":
+        case "get":
             await db.promise().query(`select department.name  as "Department Name",
             sum(roles.salary) as "Total Salary Budget"
             from department
@@ -51,13 +51,14 @@ async function manageDepartments(){
             where department.id = roles.department_id and roles.id = employee.role_id
             group by department.name`)
             .then( ([rows,fields]) => {
+                console.log( chalk.bgBlueBright.white ("Showing all departments"));
                 console.table(rows);
             })
             .catch(console.error())
 
 
             break;
-        case "add":
+        case "post":
 
             const dept = await inquirer.prompt([
                 {
@@ -76,7 +77,7 @@ async function manageDepartments(){
             insert into department ( name ) values ( ? );`,
             dept.deptName)
             .then( ([rows,fields]) => {
-                console.log(`Added ${dept.deptName} to Departments`);
+                console.log( chalk.bgBlueBright.white (`Added ${dept.deptName} to Departments`));
             }) 
 
 

@@ -9,13 +9,15 @@ async function init(){
 
     console.log( chalk.bgGray.green.bold(" Welcome to the employee database. \n"));
 
-    // await inquirer.prompt([
-    //     {
-    //         type: 'input',
-    //         name: 'welcome',
-    //         message: 'Press ENTER to continue, CTRL+C to QUIT at any time'
-    //     }
-    // ])
+    await inquirer.prompt([
+        {
+            type: 'input',
+            name: 'welcome',
+            message: 'Press ENTER to continue, CTRL+C to QUIT at any time'
+        }
+    ])
+
+    console.clear()
 
     console.log( chalk.bgRed("main call"));
 
@@ -36,12 +38,12 @@ async function employeeDatabase() {
 
     const manageChoice = await inquirer.prompt(mainMenu);
 
-    console.log(manageChoice.mainMenuChoice);
+    console.clear();
      
     switch (manageChoice.mainMenuChoice){
 
         case "employees":
-
+            await employee.manageEmployees();
             break;
 
         case "departments":

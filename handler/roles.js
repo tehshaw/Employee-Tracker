@@ -13,11 +13,11 @@ const rolesMenu = [
             new inquirer.Separator(), 
             {
                 name: "Show roles",
-                value: "all"
+                value: "get"
             },
             {
                 name: "Add role",
-                value: "add"
+                value: "post"
             },
             new inquirer.Separator(), 
             {
@@ -39,7 +39,7 @@ async function manageRoles(){
      switch (rolesActions.action){
 
         case "all":
-            await allRoles();
+            await getRoles();
             break;
         
         case "add":
@@ -58,7 +58,7 @@ async function manageRoles(){
     return;    
 }
 
-async function allRoles() {
+async function getRoles() {
     await db.promise().query(`
     select roles.title as "Role Title",
 		roles.id as "Role ID",
@@ -67,7 +67,6 @@ async function allRoles() {
         from roles
         inner join department on roles.department_id = department.id`,)
     .then(([rows,fields]) => {
-        console.clear()
         console.log( chalk.bgBlueBright.white("Showing all roles"));
         console.table(rows);
     } )
@@ -125,7 +124,6 @@ async function addRole(){
     insert into roles ( title, salary, department_id ) values ( ?, ?, ? );`,
     [roleName, salary, deptAssign])
     .then(([rows,fields]) => {
-        console.clear();
         console.log( chalk.bgBlueBright.white(`Added ${roleName} to Roles`));
     } )
     .catch((err) => {
