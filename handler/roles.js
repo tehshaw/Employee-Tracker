@@ -11,15 +11,19 @@ const rolesMenu = [
         message: "Select an option:",
         choices: [
             new inquirer.Separator(), 
-             {
-                 name: "Add role",
-                 value: "add"
-             },
-             new inquirer.Separator(), 
-             {
-                 name: "Main Menu",
-                 value: "quit"
-             }],
+            {
+                name: "Show roles",
+                value: "all"
+            },
+            {
+                name: "Add role",
+                value: "add"
+            },
+            new inquirer.Separator(), 
+            {
+                name: "Main Menu",
+                value: "quit"
+            }],
         default: 0
     }
 ]
@@ -30,61 +34,17 @@ async function manageRoles(){
 
     const rolesActions =  await inquirer.prompt(rolesMenu)
 
-    let deptsRaw;
-    
-    await db.promise().query(`select * from department;`)
-    .then( ([rows,fields])  => {
-        deptsRaw = rows;
-    })
-    .catch(console.error)
-    .then( () => {})
+
 
      switch (rolesActions.action){
+
+        case "all":
+            await allRoles();
+            break;
         
         case "add":
 
-            const newRole = await inquirer.prompt([
-                {
-                    type: 'input',
-                    name: 'roleName',
-                    message: 'Enter title: ',
-                    validate(answer){
-                        return answer.roleName !== "" || "Must not be empty";
-                    }
-                },
-                {
-                    type: 'number',
-                    name: 'salary',
-                    message: 'Enter annual salary: ',
-                    validate(answer){
-                        return answer.salary !== "" || "Must not be empty";
-                    }
-                },
-                {
-                    type: 'list',
-                    name: 'deptAssign',
-                    message: 'what department does this role belong? ',
-                    choices: deptsRaw.map(dept => dept.name),
-                    filter: (input) => {
-                        const deptNum = deptsRaw.find( ({name}) => name === input).id
-                        return deptNum
-                    }
-                    
-                },
-            ])
-
-            const { roleName, salary, deptAssign } = newRole;
-
-            await db.promise().query(`
-            insert into roles ( title, salary, department_id ) values ( ?, ?, ? );`,
-            [roleName, salary, deptAssign])
-            .then(([rows,fields]) => {
-                console.log(`Added ${roleName} to Roles`);
-            } )
-            .catch((err) => {
-                console.log(err);
-            })
-
+            await addRole();
             break;
 
         case "quit":
@@ -98,6 +58,83 @@ async function manageRoles(){
     return;    
 }
 
+async function allRoles() {
+    await db.promise().query(`
+    select roles.title as "Role Title",
+		roles.id as "Role ID",
+		department.name as "Department",
+		roles.salary as "Salary"
+        from roles
+        inner join department on roles.department_id = department.id`,)
+    .then(([rows,fields]) => {
+        console.clear()
+        console.log( chalk.bgBlueBright.white("Showing all roles"));
+        console.table(rows);
+    } )
+    .catch((err) => {
+        console.log(err);
+    })
+
+
+}
+
+
+async function addRole(){
+
+    let deptsRaw;
+    
+    await db.promise().query(`select * from department;`)
+    .then( ([rows,fields])  => {
+        deptsRaw = rows;
+    })
+    .catch(console.error)
+
+    const newRole = await inquirer.prompt([
+        {
+            type: 'input',
+            name: 'roleName',
+            message: 'Enter title: ',
+            validate(answer){
+                return answer.roleName !== "" || "Must not be empty";
+            }
+        },
+        {
+            type: 'number',
+            name: 'salary',
+            message: 'Enter annual salary: ',
+            validate(answer){
+                return answer.salary !== "" || "Must not be empty";
+            }
+        },
+        {
+            type: 'list',
+            name: 'deptAssign',
+            message: 'what department does this role belong? ',
+            choices: deptsRaw.map(dept => dept.name),
+            filter: (input) => {
+                const deptNum = deptsRaw.find( ({name}) => name === input).id
+                return deptNum
+            }
+            
+        },
+    ])
+
+    const { roleName, salary, deptAssign } = newRole;
+
+    await db.promise().query(`
+    insert into roles ( title, salary, department_id ) values ( ?, ?, ? );`,
+    [roleName, salary, deptAssign])
+    .then(([rows,fields]) => {
+        console.clear();
+        console.log( chalk.bgBlueBright.white(`Added ${roleName} to Roles`));
+    } )
+    .catch((err) => {
+        console.log(err);
+    })
+
+    return;
+
+}
 
 
 
