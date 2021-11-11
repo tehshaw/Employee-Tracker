@@ -107,7 +107,6 @@ async function addEmployee(){
     await db.promise().query(`select * from employee;`)
     .then( ([rows,fields])  => {
         managerRaw = rows;
-        console.log(managerRaw);
     })
     .catch(console.error)
     
@@ -224,7 +223,6 @@ async function updateEmployee(){
 
 
 
-    console.log(currentE, newRole);
 
 }
 

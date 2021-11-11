@@ -19,11 +19,7 @@ async function init(){
 
     console.clear()
 
-    console.log( chalk.bgRed("main call"));
-
     await employeeDatabase();
-
-    console.log( chalk.bgRed("main call end"));
 
     db.end();
     
@@ -64,11 +60,8 @@ async function employeeDatabase() {
             break;
     }
 
-    console.log("before call back");
-
     await employeeDatabase();
 
-    console.log("After call back");
 
     return;
 

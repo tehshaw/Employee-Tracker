@@ -38,7 +38,6 @@ async function manageDepartments(){
 
     const deparmentActions =  await inquirer.prompt(deptMenu)
 
-    console.log(deparmentActions.action);
 
     switch (deparmentActions.action){
         
@@ -71,7 +70,7 @@ async function manageDepartments(){
                 }
             ])
 
-            console.log(dept.deptName);
+
 
             await db.promise().query(`
             insert into department ( name ) values ( ? );`,
